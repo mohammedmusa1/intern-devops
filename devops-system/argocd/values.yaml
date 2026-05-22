@@ -1,0 +1,7 @@
+server:
+  service:
+    type: NodePort
+    nodePortHttp: 30081
+configs:
+  params:
+    server.insecure: true

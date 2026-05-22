@@ -1,0 +1,48 @@
+controller:
+  adminPassword: "admin"
+  serviceType: NodePort
+  nodePort: 30080
+  installPlugins:
+    - kubernetes:4.1
+    - workflow-job:1400.v7fd111b_637fb_
+    - workflow-aggregator:596.v8c21c963d92d
+    - credentials-binding:681.vf91669a_32e45
+    - git:5.2.1
+    - configuration-as-code:1775.v810dc950b_514
+    - docker-workflow:580.vc0c340686b_54
+    - github-branch-source:1784.v6d5e1ff833b_e
+  JCasC:
+    defaultConfig: true
+    configScripts:
+      setup: |
+        credentials:
+          system:
+            domainCredentials:
+            - credentials:
+              - usernamePassword:
+                  scope: GLOBAL
+                  id: "dockerhub-creds"
+                  username: "${dockerhub_username}"
+                  password: "${dockerhub_token}"
+              - string:
+                  scope: GLOBAL
+                  id: "github-pat"
+                  secret: "${github_pat}"
+        jobs:
+          - script: >
+              pipelineJob('Auto-Build') {
+                definition {
+                  cpsScm {
+                    scm {
+                      git {
+                        remote { url('${github_repo}') }
+                        branches('*/main')
+                      }
+                    }
+                    scriptPath('Jenkinsfile')
+                  }
+                }
+              }
+  sidecars:
+    configAutoReload:
+      enabled: true
