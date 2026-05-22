@@ -39,9 +39,8 @@ spec:
                     script {
                         echo "Building Docker Image..."
                         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                            env.DOCKER_IMAGE = "${env.DOCKER_USER}/my-app"
-                            sh "docker build -t ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} ."
-                            sh "docker tag ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} ${env.DOCKER_IMAGE}:latest"
+                            sh "docker build -t \$DOCKER_USER/my-app:${env.DOCKER_TAG} ."
+                            sh "docker tag \$DOCKER_USER/my-app:${env.DOCKER_TAG} \$DOCKER_USER/my-app:latest"
                         }
                     }
                 }
@@ -54,10 +53,9 @@ spec:
                     script {
                         echo "Pushing Docker Image..."
                         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                            env.DOCKER_IMAGE = "${env.DOCKER_USER}/my-app"
                             sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
-                            sh "docker push ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
-                            sh "docker push ${env.DOCKER_IMAGE}:latest"
+                            sh "docker push \$DOCKER_USER/my-app:${env.DOCKER_TAG}"
+                            sh "docker push \$DOCKER_USER/my-app:latest"
                         }
                     }
                 }
@@ -72,11 +70,10 @@ spec:
                         string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN'),
                         usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')
                     ]) {
-                        env.DOCKER_IMAGE = "${env.DOCKER_USER}/my-app"
                         sh """
                         git config user.email "jenkins@devops.com"
                         git config user.name "Jenkins CI"
-                        sed -i "s|image: .*|image: ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}|g" devops-system/k8s/app/deployment.yaml
+                        sed -i "s|image: .*|image: \$DOCKER_USER/my-app:${env.DOCKER_TAG}|g" devops-system/k8s/app/deployment.yaml
                         git add devops-system/k8s/app/deployment.yaml
                         git commit -m "Deploy ${env.DOCKER_TAG} via CI"
                         git push https://${GITHUB_TOKEN}@github.com/mohammedmusa1/intern-devops.git HEAD:main
