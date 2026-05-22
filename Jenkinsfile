@@ -34,14 +34,6 @@ spec:
         }
         
         stage('Build Docker Image') {
-            when {
-                anyOf {
-                    changeset "*.html"
-                    changeset "*.css"
-                    changeset "Task*/**"
-                    changeset "Dockerfile"
-                }
-            }
             steps {
                 container('docker') {
                     script {
@@ -56,14 +48,6 @@ spec:
         }
         
         stage('Push Docker Image') {
-            when {
-                anyOf {
-                    changeset "*.html"
-                    changeset "*.css"
-                    changeset "Task*/**"
-                    changeset "Dockerfile"
-                }
-            }
             steps {
                 container('docker') {
                     script {
@@ -79,14 +63,6 @@ spec:
         }
 
         stage('Update GitOps Manifests') {
-            when {
-                anyOf {
-                    changeset "*.html"
-                    changeset "*.css"
-                    changeset "Task*/**"
-                    changeset "Dockerfile"
-                }
-            }
             steps {
                 script {
                     echo "Updating Kubernetes Manifests for ArgoCD..."
