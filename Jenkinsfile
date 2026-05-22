@@ -47,7 +47,7 @@ pipeline {
                         sed -i "s|image: .*|image: ${DOCKER_IMAGE}:${DOCKER_TAG}|g" devops-system/k8s/app/deployment.yaml
                         git add devops-system/k8s/app/deployment.yaml
                         git commit -m "Deploy ${DOCKER_TAG} via CI"
-                        git push https://${GITHUB_TOKEN}@github.com/mohammedmusa1/internshiproject.git HEAD:main
+                        git push https://${GITHUB_TOKEN}@github.com/mohammedmusa1/intern-devops.git HEAD:main
                         """
                     }
                 }
