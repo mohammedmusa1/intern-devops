@@ -39,7 +39,7 @@ spec:
                     script {
                         echo "Building Docker Image..."
                         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                            env.DOCKER_IMAGE = "${DOCKER_USER}/my-app"
+                            env.DOCKER_IMAGE = "${env.DOCKER_USER}/my-app"
                             sh "docker build -t ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} ."
                             sh "docker tag ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} ${env.DOCKER_IMAGE}:latest"
                         }
@@ -54,7 +54,7 @@ spec:
                     script {
                         echo "Pushing Docker Image..."
                         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                            env.DOCKER_IMAGE = "${DOCKER_USER}/my-app"
+                            env.DOCKER_IMAGE = "${env.DOCKER_USER}/my-app"
                             sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
                             sh "docker push ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
                             sh "docker push ${env.DOCKER_IMAGE}:latest"
@@ -72,7 +72,7 @@ spec:
                         string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN'),
                         usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')
                     ]) {
-                        env.DOCKER_IMAGE = "${DOCKER_USER}/my-app"
+                        env.DOCKER_IMAGE = "${env.DOCKER_USER}/my-app"
                         sh """
                         git config user.email "jenkins@devops.com"
                         git config user.name "Jenkins CI"
