@@ -23,7 +23,6 @@ spec:
     }
 
     environment {
-        DOCKER_IMAGE = "${env.dockerhub_username}/my-app"
         DOCKER_TAG = "build-${env.BUILD_NUMBER}"
     }
 
@@ -39,8 +38,11 @@ spec:
                 container('docker') {
                     script {
                         echo "Building Docker Image..."
-                        sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
-                        sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                            env.DOCKER_IMAGE = "${DOCKER_USER}/my-app"
+                            sh "docker build -t ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} ."
+                            sh "docker tag ${env.DOCKER_IMAGE}:${env.DOCKER_TAG} ${env.DOCKER_IMAGE}:latest"
+                        }
                     }
                 }
             }
@@ -52,9 +54,10 @@ spec:
                     script {
                         echo "Pushing Docker Image..."
                         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                            env.DOCKER_IMAGE = "${DOCKER_USER}/my-app"
                             sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
-                            sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
-                            sh "docker push ${DOCKER_IMAGE}:latest"
+                            sh "docker push ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}"
+                            sh "docker push ${env.DOCKER_IMAGE}:latest"
                         }
                     }
                 }
@@ -65,13 +68,17 @@ spec:
             steps {
                 script {
                     echo "Updating Kubernetes Manifests for ArgoCD..."
-                    withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
+                    withCredentials([
+                        string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN'),
+                        usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')
+                    ]) {
+                        env.DOCKER_IMAGE = "${DOCKER_USER}/my-app"
                         sh """
                         git config user.email "jenkins@devops.com"
                         git config user.name "Jenkins CI"
-                        sed -i "s|image: .*|image: ${DOCKER_IMAGE}:${DOCKER_TAG}|g" devops-system/k8s/app/deployment.yaml
+                        sed -i "s|image: .*|image: ${env.DOCKER_IMAGE}:${env.DOCKER_TAG}|g" devops-system/k8s/app/deployment.yaml
                         git add devops-system/k8s/app/deployment.yaml
-                        git commit -m "Deploy ${DOCKER_TAG} via CI"
+                        git commit -m "Deploy ${env.DOCKER_TAG} via CI"
                         git push https://${GITHUB_TOKEN}@github.com/mohammedmusa1/intern-devops.git HEAD:main
                         """
                     }
