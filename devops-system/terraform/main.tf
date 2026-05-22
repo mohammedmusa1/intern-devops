@@ -1,5 +1,23 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 6.0"
+    }
+    github = {
+      source  = "integrations/github"
+      version = "~> 6.0"
+    }
+  }
+}
+
 provider "aws" {
   region = var.aws_region
+}
+
+provider "github" {
+  token = var.github_pat
+  owner = split("/", replace(replace(var.github_repo, "https://github.com/", ""), ".git", ""))[0]
 }
 
 # 1. VPC & Networking
@@ -176,4 +194,18 @@ resource "aws_instance" "devops" {
 resource "aws_eip" "devops_eip" {
   instance = aws_instance.devops.id
   domain   = "vpc"
+}
+
+# 7. GitHub Webhook for Jenkins
+resource "github_repository_webhook" "jenkins" {
+  repository = split("/", replace(replace(var.github_repo, "https://github.com/", ""), ".git", ""))[1]
+  
+  configuration {
+    url          = "http://${aws_eip.devops_eip.public_ip}:30080/github-webhook/"
+    content_type = "json"
+    insecure_ssl = true
+  }
+
+  active = true
+  events = ["push"]
 }

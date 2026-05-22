@@ -36,6 +36,9 @@ controller:
         jobs:
           - script: >
               pipelineJob('Auto-Build') {
+                triggers {
+                  githubPush()
+                }
                 definition {
                   cpsScm {
                     scm {
