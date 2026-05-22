@@ -15,7 +15,7 @@ spec:
     spec:
       initContainers:
       - name: git-clone
-        image: zishan001/my-app:build-1
+        image: zishan001/my-app:build-2
         command:
         - /bin/sh
         - -c
@@ -32,7 +32,7 @@ spec:
           mountPath: /webroot
       containers:
       - name: my-app
-        image: zishan001/my-app:build-1
+        image: zishan001/my-app:build-2
         ports:
         - containerPort: 80
         volumeMounts:
