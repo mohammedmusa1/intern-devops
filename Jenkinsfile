@@ -1,5 +1,26 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: docker
+    image: docker:cli
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - mountPath: /var/run/docker.sock
+      name: docker-sock
+  volumes:
+  - name: docker-sock
+    hostPath:
+      path: /var/run/docker.sock
+'''
+        }
+    }
 
     environment {
         DOCKER_IMAGE = "${env.dockerhub_username}/my-app"
@@ -15,22 +36,26 @@ pipeline {
         
         stage('Build Docker Image') {
             steps {
-                script {
-                    echo "Building Docker Image..."
-                    sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
-                    sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+                container('docker') {
+                    script {
+                        echo "Building Docker Image..."
+                        sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                        sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+                    }
                 }
             }
         }
         
         stage('Push Docker Image') {
             steps {
-                script {
-                    echo "Pushing Docker Image..."
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
-                        sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
-                        sh "docker push ${DOCKER_IMAGE}:latest"
+                container('docker') {
+                    script {
+                        echo "Pushing Docker Image..."
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                            sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
+                            sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                            sh "docker push ${DOCKER_IMAGE}:latest"
+                        }
                     }
                 }
             }

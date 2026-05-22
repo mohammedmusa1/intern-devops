@@ -3,6 +3,8 @@ controller:
     password: "admin"
   serviceType: NodePort
   nodePort: 30080
+  startupProbe:
+    failureThreshold: 60
   installPlugins:
     - kubernetes
     - workflow-job
@@ -12,6 +14,8 @@ controller:
     - configuration-as-code
     - docker-workflow
     - github-branch-source
+    - job-dsl
+    - pipeline-stage-view
   JCasC:
     defaultConfig: true
     configScripts:
