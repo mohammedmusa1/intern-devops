@@ -34,6 +34,14 @@ spec:
         }
         
         stage('Build Docker Image') {
+            when {
+                anyOf {
+                    changeset "*.html"
+                    changeset "*.css"
+                    changeset "Task*/**"
+                    changeset "Dockerfile"
+                }
+            }
             steps {
                 container('docker') {
                     script {
@@ -48,6 +56,14 @@ spec:
         }
         
         stage('Push Docker Image') {
+            when {
+                anyOf {
+                    changeset "*.html"
+                    changeset "*.css"
+                    changeset "Task*/**"
+                    changeset "Dockerfile"
+                }
+            }
             steps {
                 container('docker') {
                     script {
@@ -63,6 +79,14 @@ spec:
         }
 
         stage('Update GitOps Manifests') {
+            when {
+                anyOf {
+                    changeset "*.html"
+                    changeset "*.css"
+                    changeset "Task*/**"
+                    changeset "Dockerfile"
+                }
+            }
             steps {
                 script {
                     echo "Updating Kubernetes Manifests for ArgoCD..."
@@ -75,7 +99,7 @@ spec:
                         git config user.name "Jenkins CI"
                         sed -i "s|image: .*|image: \$DOCKER_USER/my-app:${env.DOCKER_TAG}|g" devops-system/k8s/app/deployment.yaml
                         git add devops-system/k8s/app/deployment.yaml
-                        git commit -m "Deploy ${env.DOCKER_TAG} via CI"
+                        git commit -m "Deploy ${env.DOCKER_TAG} via CI [ci skip]"
                         git push https://${GITHUB_TOKEN}@github.com/mohammedmusa1/intern-devops.git HEAD:main
                         """
                     }
