@@ -16,6 +16,6 @@ spec:
 
       containers:
       - name: my-app
-        image: zishan001/my-app:build-41
+        image: zishan001/my-app:build-43
         ports:
         - containerPort: 80
