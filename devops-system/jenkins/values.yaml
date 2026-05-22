@@ -45,6 +45,11 @@ controller:
                       git {
                         remote { url('${github_repo}') }
                         branches('*/main')
+                        extensions {
+                          messageExclusion {
+                            excludedMessage('(?s).*\\[ci skip\\].*')
+                          }
+                        }
                       }
                     }
                     scriptPath('Jenkinsfile')
