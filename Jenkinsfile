@@ -17,8 +17,8 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker Image..."
-                    // sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
-                    // sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+                    sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
                 }
             }
         }
@@ -27,13 +27,11 @@ pipeline {
             steps {
                 script {
                     echo "Pushing Docker Image..."
-                    /*
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
                         sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
                         sh "docker push ${DOCKER_IMAGE}:latest"
                     }
-                    */
                 }
             }
         }
@@ -42,18 +40,16 @@ pipeline {
             steps {
                 script {
                     echo "Updating Kubernetes Manifests for ArgoCD..."
-                    /*
                     withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
                         sh """
                         git config user.email "jenkins@devops.com"
                         git config user.name "Jenkins CI"
-                        sed -i 's|image: ${DOCKER_IMAGE}:.*|image: ${DOCKER_IMAGE}:${DOCKER_TAG}|g' k8s/app/deployment.yaml
-                        git add k8s/app/deployment.yaml
+                        sed -i "s|image: .*|image: ${DOCKER_IMAGE}:${DOCKER_TAG}|g" devops-system/k8s/app/deployment.yaml
+                        git add devops-system/k8s/app/deployment.yaml
                         git commit -m "Deploy ${DOCKER_TAG} via CI"
                         git push https://${GITHUB_TOKEN}@github.com/mohammedmusa1/internshiproject.git HEAD:main
                         """
                     }
-                    */
                 }
             }
         }
