@@ -23,12 +23,12 @@ controller:
               - usernamePassword:
                   scope: GLOBAL
                   id: "dockerhub-creds"
-                  username: "${dockerhub_username}"
-                  password: "${dockerhub_token}"
+                  username: ""
+                  password: ""
               - string:
                   scope: GLOBAL
                   id: "github-pat"
-                  secret: "${github_pat}"
+                  secret: ""
         jobs:
           - script: >
               pipelineJob('Auto-Build') {
@@ -36,7 +36,7 @@ controller:
                   cpsScm {
                     scm {
                       git {
-                        remote { url('${github_repo}') }
+                        remote { url('https://github.com/mohammedmusa1/intern-devops.git') }
                         branches('*/main')
                       }
                     }
@@ -47,3 +47,4 @@ controller:
   sidecars:
     configAutoReload:
       enabled: true
+

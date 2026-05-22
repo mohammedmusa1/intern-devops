@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/mohammedmusa1/intern-devops.git'
+    repoURL: '${github_repo}'
     targetRevision: HEAD
     path: devops-system/k8s/app
   destination:

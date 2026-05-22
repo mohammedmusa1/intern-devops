@@ -13,8 +13,31 @@ spec:
       labels:
         app: my-app
     spec:
+      initContainers:
+      - name: git-clone
+        image: alpine/git:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          git clone --depth 1 https://github.com/mohammedmusa1/intern-devops.git /tmp/repo
+          cp -r /tmp/repo/index.html /tmp/repo/style.css /webroot/
+          for dir in "Task 1" "Task 2" "Task 3" "Task 4" "Task 5" "Task 6" "Task 7" "Task 8" "Task 9"; do
+            if [ -d "/tmp/repo/$dir" ]; then
+              cp -r "/tmp/repo/$dir" "/webroot/$dir"
+            fi
+          done
+        volumeMounts:
+        - name: webroot
+          mountPath: /webroot
       containers:
       - name: my-app
-        image: nginx:latest
+        image: nginx:alpine
         ports:
         - containerPort: 80
+        volumeMounts:
+        - name: webroot
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: webroot
+        emptyDir: {}
