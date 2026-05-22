@@ -15,7 +15,7 @@ spec:
     spec:
       initContainers:
       - name: git-clone
-        image: alpine/git:latest
+        image: zishan001/my-app:build-1
         command:
         - /bin/sh
         - -c
@@ -32,7 +32,7 @@ spec:
           mountPath: /webroot
       containers:
       - name: my-app
-        image: nginx:alpine
+        image: zishan001/my-app:build-1
         ports:
         - containerPort: 80
         volumeMounts:
